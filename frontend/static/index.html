@@ -471,11 +471,18 @@ async function sendMessage(text) {
     });
     const data = await res.json();
     if (data.session_id) sessionId = data.session_id;
-    thinkingBubble.textContent = data.reply || "(No reply received)";
+
+    if (data.parts && Array.isArray(data.parts)) {
+      const texts = data.parts.map(p => p.text || (p.kind === "text" ? p.text : "")).filter(Boolean);
+      thinkingBubble.textContent = texts.join("\n\n") || "(No reply received)";
+    } else {
+      thinkingBubble.textContent = data.reply || "(No reply received)";
+    }
   } catch (err) {
     thinkingBubble.textContent = "Error communicating with companion: " + err.message;
   }
 }
+
 
 function submitOnboarding() {
   const genres = document.getElementById("pref-genres").value;
